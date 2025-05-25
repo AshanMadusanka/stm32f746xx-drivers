@@ -261,6 +261,14 @@ typedef struct {
 #define UART5_PCLK_DI() (RCC->APB1ENR &= ~(1 << 20))
 #define USART6_PCLK_DI() (RCC->APB2ENR &= ~(1 << 5))
 
+/*Generic Macros*/
+
+#define ENABLE        1
+#define DISABLE       0
+#define SET           ENABLE
+#define RESET         DISABLE
+#define GPIO_PIN_SET  SET
+#define GPIO_PIN_RESET RESET
 
 
 #endif //STM32F746XX_H
