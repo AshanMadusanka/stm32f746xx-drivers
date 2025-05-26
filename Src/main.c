@@ -19,8 +19,58 @@
 #include <stdint.h>
 #include "stm32f746xx.h"
 
+
+void Delay() {
+    for (uint32_t i = 0; i < 500000; i++) {
+        // Simple delay loop
+    }
+
+}
 int main(void)
 {
-    /* Loop forever */
-	for(;;);
+
+    GPIO_Handle_t GpioBGreen;
+    GPIO_Handle_t GpioBBlue;
+    GPIO_Handle_t GpioBRed;
+
+
+
+
+    GpioBGreen.pGPIOx = GPIOB;
+    GpioBBlue.pGPIOx = GPIOB;
+    GpioBRed.pGPIOx = GPIOB;
+    GpioBGreen.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
+    GpioBBlue.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7;
+    GpioBRed.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14;
+    GpioBGreen.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+    GpioBBlue.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+    GpioBRed.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+    GpioBGreen.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+    GpioBBlue.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+    GpioBRed.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+    GpioBGreen.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+    GpioBBlue.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+    GpioBRed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+    GpioBGreen.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    GpioBBlue.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    GpioBRed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+
+    // Enable the peripheral clock
+    GPIO_PeriClockControl(GPIOB, ENABLE);
+
+
+    // Initialize the pin
+    GPIO_Init(&GpioBGreen);
+    GPIO_Init(&GpioBBlue);
+    GPIO_Init(&GpioBRed);
+
+
+    while (1) {
+        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_0);
+        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_7);
+        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_14);
+
+        Delay();
+    }
+
 }

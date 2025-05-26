@@ -139,10 +139,11 @@ typedef struct {
   __vo uint32_t AHB1RSTR; /*!< RCC AHB1 peripheral reset register, Address offset: 0x10 */
   __vo uint32_t AHB2RSTR; /*!< RCC AHB2 peripheral reset register, Address offset: 0x14 */
   __vo uint32_t AHB3RSTR; /*!< RCC AHB3 peripheral reset register, Address offset: 0x18 */
+ uint32_t RESERVED0; /*!< Reserved, Address offset: 0x1C */
   __vo uint32_t APB1RSTR; /*!< RCC APB1 peripheral reset register, Address offset: 0x20 */
   __vo uint32_t APB2RSTR; /*!< RCC APB2 peripheral reset register, Address offset: 0x24 */
    uint32_t RESERVED1[2]; /*!< Reserved, Address offset: 0x28-0x2C */
-  __vo uint32_t AHB1ENR;  /*!< RCC AHB1 peripheral clock enable register, Address offset: 0x30 */
+  __vo uint32_t AHB1ENR ;  /*!< RCC AHB1 peripheral clock enable register, Address offset: 0x30 */
   __vo uint32_t AHB2ENR;  /*!< RCC AHB2 peripheral clock enable register, Address offset: 0x34 */
   __vo uint32_t AHB3ENR;  /*!< RCC AHB3 peripheral clock enable register, Address offset: 0x38 */
    uint32_t RESERVED2; /*!< Reserved, Address offset: 0x3C */
@@ -169,7 +170,7 @@ typedef struct {
 
 /*Peripheral definitions (Peripheral base addresses type cast to xxx Regdef_t) */
 
-#define RCC ((RCC_RegDef_t *)RCC_BASEADDR)
+#define RCC ((RCC_RegDef_t*)RCC_BASEADDR)
 
 #define GPIOA ((GPIO_RegDef_t *)GPIOA_BASEADDR)
 #define GPIOB ((GPIO_RegDef_t *)GPIOB_BASEADDR)
@@ -285,5 +286,6 @@ typedef struct {
 #define GPIO_PIN_SET  SET
 #define GPIO_PIN_RESET RESET
 
+#include "stm32f746xx_gpio_driver.h"
 
 #endif //STM32F746XX_H

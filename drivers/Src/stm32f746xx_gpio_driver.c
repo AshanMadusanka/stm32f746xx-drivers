@@ -6,12 +6,12 @@
  */
 
 #include "stm32f746xx_gpio_driver.h"
-
+#include "stm32f746xx.h"
 
 /*Peripheral Clock setup*/
 void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnorDi){
 
-  if(EnorDi == ENABLE){
+    if(EnorDi == ENABLE){
 
       if (pGPIOx == GPIOA) {
 
@@ -20,6 +20,7 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnorDi){
       else if(pGPIOx == GPIOB) {
 
           GPIOB_PCLK_EN();
+
       }
       else if(pGPIOx == GPIOC) {
 
@@ -209,14 +210,11 @@ uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber) {
 
 
     uint8_t value = 0;
-    value = pGPIOx->IDR & (1 << PinNumber);
+    value = (uint8_t)pGPIOx->IDR >> PinNumber & 0x00000001;
     return value;
 }
 uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx) {
-
-
-    uint16_t value = 0;
-    value = pGPIOx->IDR;
+    uint16_t value = (uint16_t) pGPIOx->IDR;
     return value;
 }
 
@@ -232,7 +230,7 @@ void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber, uint8_t Val
 }
 void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint16_t Value) {
 
-  pGPIOx->ODR = Value;
+    pGPIOx->ODR = Value;
 
 }
 void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber) {
