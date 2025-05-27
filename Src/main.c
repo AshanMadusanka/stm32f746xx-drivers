@@ -48,12 +48,12 @@ int main(void)
     GpioBGreen.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
     GpioBBlue.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
     GpioBRed.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    GpioBGreen.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-    GpioBBlue.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-    GpioBRed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-    GpioBGreen.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
-    GpioBBlue.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
-    GpioBRed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    GpioBGreen.GPIO_PinConfig.GPIO_PinPuPdControl =GPIO_PIN_PU; // Pull-up for green LED
+    GpioBBlue.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU; // Pull-up for blue LED
+    GpioBRed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU; // Pull-up for red LED
+    GpioBGreen.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain for green LED
+    GpioBBlue.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain for blue LED
+    GpioBRed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain for red LED
 
     // Enable the peripheral clock
     GPIO_PeriClockControl(GPIOB, ENABLE);
