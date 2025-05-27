@@ -21,7 +21,7 @@
 
 
 void Delay() {
-    for (uint32_t i = 0; i < 500000; i++) {
+    for (uint32_t i = 0; i < 500000/2; i++) {
         // Simple delay loop
     }
 
@@ -30,47 +30,40 @@ int main(void)
 {
 
     GPIO_Handle_t GpioBGreen;
-    GPIO_Handle_t GpioBBlue;
-    GPIO_Handle_t GpioBRed;
-
-
-
+    GPIO_Handle_t GpioCButton;
 
     GpioBGreen.pGPIOx = GPIOB;
-    GpioBBlue.pGPIOx = GPIOB;
-    GpioBRed.pGPIOx = GPIOB;
+    GpioCButton.pGPIOx = GPIOC;
     GpioBGreen.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
-    GpioBBlue.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7;
-    GpioBRed.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14;
     GpioBGreen.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-    GpioBBlue.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-    GpioBRed.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
     GpioBGreen.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    GpioBBlue.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    GpioBRed.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    GpioBGreen.GPIO_PinConfig.GPIO_PinPuPdControl =GPIO_PIN_PU; // Pull-up for green LED
-    GpioBBlue.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU; // Pull-up for blue LED
-    GpioBRed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU; // Pull-up for red LED
-    GpioBGreen.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain for green LED
-    GpioBBlue.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain for blue LED
-    GpioBRed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain for red LED
+
+    GpioCButton.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN; // Input mode for button
+    GpioCButton.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_13; // Button pin
+    GpioCButton.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST; // Fast speed for button
+    GpioCButton.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; // No pull-up or pull-down for button
+
 
     // Enable the peripheral clock
     GPIO_PeriClockControl(GPIOB, ENABLE);
+    GPIO_PeriClockControl(GPIOC, ENABLE);
 
 
     // Initialize the pin
+    GPIO_Init(&GpioCButton);
     GPIO_Init(&GpioBGreen);
-    GPIO_Init(&GpioBBlue);
-    GPIO_Init(&GpioBRed);
 
 
     while (1) {
-        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_0);
-        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_7);
-        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_14);
 
-        Delay();
+		if (GPIO_ReadFromInputPin(GPIOC, GPIO_PIN_13) == 1) {
+		    Delay();
+			GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_0); // Toggle the green LED pin
+
+		}
+
     }
 
 }
+
+

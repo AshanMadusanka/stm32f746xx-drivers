@@ -131,6 +131,8 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
     if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <=GPIO_MODE_ANALOG) {
 
         temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <<(2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+        pGPIOHandle->pGPIOx->MODER &= ~(0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); // Clear the bits
+
         pGPIOHandle->pGPIOx->MODER |= temp;
     }
     else {
@@ -140,22 +142,26 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
     temp = 0;
 
     temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
+    pGPIOHandle->pGPIOx->OTYPER &= ~(0x1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber); // Clear the bit
     pGPIOHandle->pGPIOx->OTYPER |= temp;
 
     temp = 0;
 
     temp =pGPIOHandle->GPIO_PinConfig.GPIO_PinSpeed << (2* pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+    pGPIOHandle->pGPIOx->OSPEEDR &= ~(0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); // Clear the bits
     pGPIOHandle->pGPIOx->OSPEEDR |= temp;
 
     temp = 0;
 
     temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinPuPdControl << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+    pGPIOHandle->pGPIOx->PUPDR &= ~(0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); // Clear the bits
     pGPIOHandle->pGPIOx->PUPDR |= temp;
 
     temp = 0;
     if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_ALT) {
         if ((pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) < 8) {
             temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+            pGPIOHandle->pGPIOx->AFR[0] &= ~(0xF << (4 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); // Clear the bits
             pGPIOHandle->pGPIOx->AFR[0] |= temp;
             temp = 0;
         }
@@ -163,6 +169,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
 
         else {
             temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4 * (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber - 8));
+            pGPIOHandle->pGPIOx->AFR[1] &= ~(0xF << (4 * (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber - 8))); // Clear the bits
             pGPIOHandle->pGPIOx->AFR[1] |= temp;
         }
     }
@@ -228,10 +235,7 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx) {
  * @retval uint8_t: Value of the pin (0 or 1).
  */
 uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber) {
-
-
-    uint8_t value = 0;
-    value = (uint8_t)pGPIOx->IDR >> PinNumber & 0x00000001;
+    uint8_t value = (uint8_t) ((pGPIOx->IDR >> PinNumber) & 0x1);
     return value;
 }
 
@@ -241,7 +245,7 @@ uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber) {
  * @retval uint16_t: Value of the input port.
  */
 uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx) {
-    uint16_t value = (uint16_t) pGPIOx->IDR;
+    uint16_t value = pGPIOx->IDR;
     return value;
 }
 
