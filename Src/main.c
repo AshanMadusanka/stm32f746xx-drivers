@@ -29,41 +29,31 @@ void Delay() {
 int main(void)
 {
 
-    GPIO_Handle_t GpioBGreen;
-    GPIO_Handle_t GpioCButton;
+    GPIO_Handle_t gpioA;
+    GPIO_Handle_t gpioB ={0};
 
-    GpioBGreen.pGPIOx = GPIOB;
-    GpioCButton.pGPIOx = GPIOC;
-    GpioBGreen.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
-    GpioBGreen.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-    GpioBGreen.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+    gpioA.pGPIOx = GPIOA;
+    gpioB.pGPIOx = GPIOB;
 
-    GpioCButton.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN; // Input mode for button
-    GpioCButton.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_13; // Button pin
-    GpioCButton.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST; // Fast speed for button
-    GpioCButton.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; // No pull-up or pull-down for button
+   // gpioA.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+    gpioB.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+   // gpioA.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+   // gpioB.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    gpioA.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_3;
+    gpioB.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
 
-
-    // Enable the peripheral clock
-    GPIO_PeriClockControl(GPIOB, ENABLE);
-    GPIO_PeriClockControl(GPIOC, ENABLE);
-
-
-    // Initialize the pin
-    GPIO_Init(&GpioCButton);
-    GPIO_Init(&GpioBGreen);
+    GPIO_PeriClockControl(GPIOA,ENABLE);
+    GPIO_PeriClockControl(GPIOB,ENABLE);
+    GPIO_Init(&gpioA);
+    GPIO_Init(&gpioB);
 
 
-    while (1) {
-
-		if (GPIO_ReadFromInputPin(GPIOC, GPIO_PIN_13) == 1) {
-		    Delay();
-			GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_0); // Toggle the green LED pin
-
-		}
-
+    while(1) {
+    	if(GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_3) == 1) {
+        Delay();
+        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_0);
     }
 
 }
 
-
+}
