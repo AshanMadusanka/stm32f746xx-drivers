@@ -17,43 +17,56 @@
  */
 
 #include <stdint.h>
+#include <string.h>
+
 #include "stm32f746xx.h"
 
-
 void Delay() {
-    for (uint32_t i = 0; i < 500000/2; i++) {
+    for (uint32_t i = 0; i < 500000 / 2; i++) {
         // Simple delay loop
     }
-
 }
-int main(void)
-{
 
-    GPIO_Handle_t gpioA;
-    GPIO_Handle_t gpioB ={0};
+int main(void) {
+    GPIO_Handle_t gpioA, gpioB;
+    memset(&gpioA, 0, sizeof(gpioA));
+    memset(&gpioB, 0, sizeof(gpioB));
 
-    gpioA.pGPIOx = GPIOA;
-    gpioB.pGPIOx = GPIOB;
+    gpioA.pGPIOx = GPIOA; // Button on PA3
+    gpioB.pGPIOx = GPIOB; // LED on PB0
 
-   // gpioA.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
-    gpioB.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-   // gpioA.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-   // gpioB.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    // Button configuration (PA3)
     gpioA.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_3;
-    gpioB.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
+    gpioA.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_RT; // Rising edge
+    gpioA.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+    gpioA.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PD; // Pull-down
+    gpioA.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // Not used for input, but harmless
 
-    GPIO_PeriClockControl(GPIOA,ENABLE);
-    GPIO_PeriClockControl(GPIOB,ENABLE);
+    // LED configuration (PB0)
+    gpioB.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
+    gpioB.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+    gpioB.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+    gpioB.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+    gpioB.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+
+    // Enable clocks and initialize
+    GPIO_PeriClockControl(GPIOA, ENABLE);
+    GPIO_PeriClockControl(GPIOB, ENABLE);
     GPIO_Init(&gpioA);
     GPIO_Init(&gpioB);
 
+    // Configure NVIC
+    GPIO_IRQPriorityConfig(IRQ_NO_EXTI3, 15); // Priority
+    GPIO_IRQInterruptConfig(IRQ_NO_EXTI3, ENABLE); // Enable
 
-    while(1) {
-    	if(GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_3) == 1) {
-        Delay();
-        GPIO_ToggleOutputPin(GPIOB,GPIO_PIN_0);
-    }
-
+    while (1) {} // Main loop
 }
+
+void EXTI3_IRQHandler() {
+
+	 Delay(); // Simple delay to debounce
+
+    GPIO_IRQHandler(GPIO_PIN_3); // Clear EXTI/NVIC pending bits
+    GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_0); // Toggle LED
 
 }

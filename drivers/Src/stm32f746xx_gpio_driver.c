@@ -157,10 +157,13 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
             EXTI->FTSR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
         }
 
+        EXTI->IMR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber); // Unmask the interrupt for the pin
+
         uint8_t temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 4; // Determine the EXTI line register (0-3)
         uint8_t temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 4; // Determine the bit position within the register
         SYSCFG_PCLK_EN();
         uint8_t port_code = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+        SYSCFG->EXTICR[temp1] &= ~(0xF << (4 * temp2)); // Clear bits
         SYSCFG->EXTICR[temp1] |= port_code << (4 *temp2);
 
     }
@@ -338,7 +341,7 @@ void GPIO_IRQInterruptConfig(uint8_t IRQNumber,uint8_t EnorDi) {
         }
         else if(IRQNumber >= 64 && IRQNumber <96) {
 
-            *NVIC_ICER2 |= (1 << (IRQNumber % 32));
+            *NVIC_ISER2 |= (1 << (IRQNumber % 32));
         }
     }
     else {
