@@ -10,6 +10,23 @@
 
 #define __vo volatile
 
+/***************************** Processor Specific Details ***********************/
+
+#define NVIC_ISER0          ((__vo uint32_t*)0xE000E100U) /*!< Interrupt Set Enable Register 0 */
+#define NVIC_ISER1          ((__vo uint32_t*)0xE000E104U) /*!< Interrupt Set Enable Register 0 */
+#define NVIC_ISER2          ((__vo uint32_t*)0xE000E108U) /*!< Interrupt Set Enable Register 0 */
+#define NVIC_ISER3          ((__vo uint32_t*)0xE000E10CU) /*!< Interrupt Set Enable Register 0 */
+
+#define NVIC_ICER0          ((__vo uint32_t*)0XE000E180U) /*!< Interrupt Clear Enable Register 0 */
+#define NVIC_ICER1          ((__vo uint32_t*)0XE000E184U) /*!< Interrupt Clear Enable Register 0 */
+#define NVIC_ICER2          ((__vo uint32_t*)0XE000E188U) /*!< Interrupt Clear Enable Register 0 */
+#define NVIC_ICER3          ((__vo uint32_t*)0XE000E18CU) /*!< Interrupt Clear Enable Register 0 */
+
+#define NVIC_PR_BASE_ADDR   ((__vo uint32_t*)0xE000E400U) /*!< Interrupt Priority Register Base Address */
+
+
+#define NO_PRIORITY_BITS_IMPLEMENTED 4 /*!< Number of priority bits implemented in the NVIC */
+
 /*  Base addresses of FLASH and SRAM */
 
 #define FLASH_BASEADDR 0x08000000U
@@ -69,6 +86,21 @@
 #define EXTI_BASEADDR  (APB2_BASEADDR + 0x3C00)
 #define SYSCFG_BASEADDR (APB2_BASEADDR + 0x3800)
 
+
+/*Return port code for given GPIO address*/
+
+#define GPIO_BASEADDR_TO_CODE(x) \
+        ((x == GPIOA) ? 0 : \
+         (x == GPIOB) ? 1 : \
+         (x == GPIOC) ? 2 : \
+         (x == GPIOD) ? 3 : \
+         (x == GPIOE) ? 4 : \
+         (x == GPIOF) ? 5 : \
+         (x == GPIOG) ? 6 : \
+         (x == GPIOH) ? 7 : \
+         (x == GPIOI) ? 8 : \
+         (x == GPIOJ) ? 9 : \
+         (x == GPIOK) ? 10 : 0)
 
 /*********************Peripheral register definition structures**************/
 
@@ -168,9 +200,32 @@ typedef struct {
 
 }RCC_RegDef_t;
 
+typedef struct {
+
+ uint32_t IMR; /*!< EXTI Interrupt mask register, Address offset: 0x00 */
+ uint32_t EMR; /*!< EXTI Event mask register, Address offset: 0x04 */
+ uint32_t RTSR; /*!< EXTI Rising trigger selection register, Address offset: 0x08 */
+ uint32_t FTSR; /*!< EXTI Falling trigger selection register, Address offset: 0x0C */
+ uint32_t SWIER; /*!< EXTI Software interrupt event register, Address offset: 0x10 */
+ uint32_t PR; /*!< EXTI Pending register, Address offset: 0x14 */
+
+}EXTI_RegDef_t;
+
+typedef struct {
+
+ uint32_t MEMRMP;      /*!< SYSCFG memory remap register, Address offset: 0x00 */
+ uint32_t PMC;         /*!< SYSCFG peripheral mode configuration register, Address offset: 0x04 */
+ uint32_t EXTICR[4];   /*!< SYSCFG external interrupt configuration registers, Address offset: 0x08-0x14 */
+ uint32_t RESVED[2]; /*!< Reserved, Address offset: 0x18-0x1C */
+ uint32_t CMPCR;       /*!< SYSCFG compensation cell control register, Address offset: 0x20 */
+
+}SYSCFG_RegDef_t;
+
 /*Peripheral definitions (Peripheral base addresses type cast to xxx Regdef_t) */
 
 #define RCC ((RCC_RegDef_t*)RCC_BASEADDR)
+#define EXTI ((EXTI_RegDef_t*)EXTI_BASEADDR)
+#define SYSCFG ((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
 
 #define GPIOA ((GPIO_RegDef_t *)GPIOA_BASEADDR)
 #define GPIOB ((GPIO_RegDef_t *)GPIOB_BASEADDR)
@@ -183,6 +238,11 @@ typedef struct {
 #define GPIOI ((GPIO_RegDef_t *)GPIOI_BASEADDR)
 #define GPIOJ ((GPIO_RegDef_t *)GPIOJ_BASEADDR)
 #define GPIOK ((GPIO_RegDef_t *)GPIOK_BASEADDR)
+
+
+/*Clock Enable Macros for GPIOx Peripherals*/
+
+#define SYSCFG_PCLK_EN() (RCC->APB2ENR |= (1 << 14))
 
 /*Clock Enable Macros for GPIOx Peripherals*/
 
@@ -276,6 +336,15 @@ typedef struct {
 #define GPIOJ_REG_RESET() do{(RCC->AHB1RSTR |= (1 << 9)); (RCC->AHB1RSTR &=~ (1 << 9));} while (0)
 #define GPIOK_REG_RESET() do{(RCC->AHB1RSTR |= (1 << 10)); (RCC->AHB1RSTR &=~ (1 << 10));} while (0)
 
+
+/*IRQ(Interupt Request) Numbers of STM32F746xx MCU*/
+#define IRQ_NO_EXTI0      6
+#define IRQ_NO_EXTI1      7
+#define IRQ_NO_EXTI2      8
+#define IRQ_NO_EXTI3      9
+#define IRQ_NO_EXTI4      10
+#define IRQ_NO_EXTI9_5   23
+#define IRQ_NO_EXTI15_10 40
 
 /*Generic Macros*/
 
