@@ -33,6 +33,94 @@ typedef struct {
 } SPI_Handle_t;
 
 /**
+ * @brief SPI Device Mode
+ *
+ * @note These macros define the possible device modes for the SPI peripheral.
+ */
+
+#define SPI_DEVICE_MODE_MASTER  1
+#define SPI_DEVICE_MODE_SLAVE   0
+
+
+/**
+ * @brief SPI Bus Configuration
+ *
+ * @note These macros define the possible bus configurations for the SPI peripheral.
+ */
+#define SPI_BUS_CONFIG_FD       1 /*!< Full Duplex */
+#define SPI_BUS_CONFIG_HD       2 /*!< Half Duplex */
+#define SPI_BUS_CONFIG_SIMPLEX_RXONLY 3 /*!< Simplex Receive Only */
+
+/**
+ * @brief SPI Clock Speed
+ *
+ * @note These macros define the possible clock speeds for the SPI peripheral.
+ */
+
+#define SPI_SCLK_SPEED_DIV2     0 /*!< Clock speed divided by 2 */
+#define SPI_SCLK_SPEED_DIV4     1 /*!< Clock speed divided by 4 */
+#define SPI_SCLK_SPEED_DIV8     2 /*!< Clock speed divided by 8 */
+#define SPI_SCLK_SPEED_DIV16    3 /*!< Clock speed divided by 16 */
+#define SPI_SCLK_SPEED_DIV32    4 /*!< Clock speed divided by 32 */
+#define SPI_SCLK_SPEED_DIV64    5 /*!< Clock speed divided by 64 */
+#define SPI_SCLK_SPEED_DIV128   6 /*!< Clock speed divided by 128 */
+#define SPI_SCLK_SPEED_DIV256   7 /*!< Clock speed divided by 256 */
+
+
+/**
+ * @brief SPI Data Frame Format
+ *
+ * @note These macros define the possible data frame formats for the SPI peripheral.
+ */
+
+#define SPI_DFF_8BITS           0 /*!< 8-bit data frame format */
+#define SPI_DFF_16BITS          1 /*!< 16-bit data frame format */
+
+/**
+ * @brief SPI Clock Polarity
+ *
+ * @note These macros define the possible clock polarities for the SPI peripheral.
+ */
+
+#define SPI_CPOL_LOW            0 /*!< Clock polarity low */
+#define SPI_CPOL_HIGH           1 /*!< Clock polarity high */
+
+/**
+ * @brief SPI Clock Phase
+ *
+ * @note These macros define the possible clock phases for the SPI peripheral
+ *
+ */
+
+#define SPI_CPHA_LOW            0 /*!< Clock phase low */
+#define SPI_CPHA_HIGH           1 /*!< Clock phase high */
+
+/**
+ * @brief SPI Software Slave Management
+ *
+ * @note These macros define the possible software slave management configurations for the SPI peripheral.
+ */
+
+#define SPI_SSM_EN              1 /*!< Software slave management enabled */
+#define SPI_SSM_DI              0 /*!< Software slave management disabled */
+
+
+#define SPI_TXE_FLAG (1<< SPI_SR_TXE)
+#define SPI_RXNE_FLAG (1<< SPI_SR_RXNE)
+#define SPI_BUSY_FLAG (1<< SPI_SR_BSY)
+#define SPI_OVR_FLAG (1<< SPI_SR_OVR)
+#define SPI_MODF_FLAG (1<< SPI_SR_MODF)
+#define SPI_CRCERR_FLAG (1<< SPI_SR_CRCERR)
+#define SPI_FRE_FLAG (1<< SPI_SR_FRE)
+#define SPI_UDR_FLAG (1<< SPI_SR_UDR)
+#define SPI_CHSIDE_FLAG (1<< SPI_SR_CHSIDE)
+
+
+
+
+
+
+/**
  * @brief Enables or disables the peripheral clock for the given SPI peripheral
  *
  * @param pSPIx Pointer to the SPI peripheral base address
@@ -54,6 +142,17 @@ void SPI_Init(SPI_Handle_t *pSPIHandle);
  */
 void SPI_DeInit(SPI_RegDef_t *pSPIx);
 
+
+/**
+ * @brief Gets the flag status of the specified flag in the SPI peripheral
+ *
+ * @param pSPIx Pointer to the SPI peripheral base address
+ * @param FlagName Name of the flag to check (e.g., SPI_SR_RXNE, SPI_SR_TXE)
+ * @return Flag status (1 if set, 0 if reset)
+ */
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName);
+
+
 /**
  * @brief Sends data through the SPI peripheral
  *
@@ -61,7 +160,7 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
  * @param pTxBuffer Pointer to the transmit buffer
  * @param Len Length of the data to be sent
  */
-void SPI_SendData(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len);
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
 
 /**
  * @brief Receives data through the SPI peripheral

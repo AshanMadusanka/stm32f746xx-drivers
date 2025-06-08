@@ -3,6 +3,8 @@
 //
 #include "stm32f746xx_spi_driver.h"
 
+#include <stdlib.h>
+
 
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
     if(EnorDi == ENABLE) {
@@ -38,17 +40,83 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
 
 void SPI_Init(SPI_Handle_t *pSPIHandle) {
 
+    uint32_t tempreg = 0;
+    // Enable the peripheral clock
+    SPI_PeriClockControl(pSPIHandle->pSPIx, ENABLE);
+
+    // Configure the SPI device mode
+    tempreg |= pSPIHandle->SPIConfig.SPI_DeviceMode << SPI_CR1_MSTR;
+    // Configure the SPI bus configuration
+    if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUS_CONFIG_FD) {
+
+        tempreg &= ~ (pSPIHandle->SPIConfig.SPI_BusConfig << SPI_CR1_BIDIMODE);
+    }
+    else if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUS_CONFIG_HD) {
+
+        tempreg |= (1 << SPI_CR1_BIDIMODE);
+    }
+    else if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUS_CONFIG_SIMPLEX_RXONLY) {
+
+        tempreg &= ~(1 << SPI_CR1_BIDIOE);
+        tempreg |= (1 << SPI_CR1_RXONLY);
+    }
+    // Configure the SPI clock speed
+    tempreg |= (pSPIHandle->SPIConfig.SPI_SclkSpeed << SPI_CR1_BR);
+
+    // Configure the SPI data frame format
+    tempreg |=(pSPIHandle->SPIConfig.SPI_DFF << SPI_CR1_DFF);
+
+    // Configure the SPI software slave management
+    tempreg |= (pSPIHandle->SPIConfig.SPI_CPOL << SPI_CR1_CPOL);
+
+    // Configure the SPI clock polarity
+    tempreg |= (pSPIHandle->SPIConfig.SPI_CPHA << SPI_CR1_CPHA);
+
+    pSPIHandle->pSPIx->CR1 = tempreg;
 
 }
 
 void SPI_DeInit(SPI_RegDef_t *pSPIx) {
-
-
+    pSPIx->CR1 = 0; // Reset the control register
 }
 
-void SPI_SendData(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len) {
-    // Implementation for sending data through SPI
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName) {
+
+    if (pSPIx->SR & FlagName) {
+        return FLAGSET;
+    }
+    return FLAGRESET ;
 }
+
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
+                // Loop until all data is sent
+                while (Len > 0) {
+
+                    // Wait until TXE (Transmit buffer empty) flag is set
+                    while (SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAGRESET);
+
+                    // Check if DFF (Data Frame Format) is 16-bit
+                    if (pSPIx->CR1 & (1 << SPI_CR1_DFF)) {
+
+                        // Load 16 bits of data into the data register
+                        pSPIx->DR = *(uint16_t*)pTxBuffer;
+                        // Decrement length by 2 bytes
+                        Len--;
+                        Len--;
+                        // Increment buffer pointer by 2 bytes
+                        (uint16_t*)pTxBuffer++;
+                    }
+                    else {
+                        // Load 8 bits of data into the data register
+                        pSPIx->DR = *pTxBuffer;
+                        // Decrement length by 1 byte
+                        Len--;
+                        // Increment buffer pointer by 1 byte
+                        pTxBuffer++;
+                    }
+                }
+
+            }
 
 void SPI_ReceiveData(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t Len) {
     // Implementation for receiving data through SPI
