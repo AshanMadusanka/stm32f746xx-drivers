@@ -1,0 +1,5 @@
+# ninja log v6
+7	164	7710141388078674	CMakeFiles/stm32f7xx_drivers.dir/Src/main.c.obj	a0c39818e94a7328
+26	171	7710141388274828	CMakeFiles/stm32f7xx_drivers.dir/Src/sysmem.c.obj	f6eb462ff03100b8
+36	215	7710141388351826	CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_gpio_driver.c.obj	3b1edb0aa107e1b7
+47	166	7710141388439961	CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_spi_driver.c.obj	f1378302851ce1a1
