@@ -194,4 +194,5 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
  */
 void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
 
+
 #endif //STM32F746XX_SPI_DRIVER_H
