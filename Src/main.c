@@ -21,6 +21,13 @@
 
 #include "stm32f746xx.h"
 
+/** SPI2 Pins  ALT5
+ * PB9 --->NSS
+ * PB10--->SCK
+ * PB14--->MISO
+ * PB15___>MOSI
+ */
+
 void Delay() {
     for (uint32_t i = 0; i < 500000 / 2; i++) {
         // Simple delay loop
@@ -28,45 +35,29 @@ void Delay() {
 }
 
 int main(void) {
-    GPIO_Handle_t gpioA, gpioB;
-    memset(&gpioA, 0, sizeof(gpioA));
-    memset(&gpioB, 0, sizeof(gpioB));
 
-    gpioA.pGPIOx = GPIOA; // Button on PA3
-    gpioB.pGPIOx = GPIOB; // LED on PB0
+    GPIO_Handle_t SPIPins;
 
-    // Button configuration (PA3)
-    gpioA.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_3;
-    gpioA.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_RT; // Rising edge
-    gpioA.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    gpioA.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PD; // Pull-down
-    gpioA.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // Not used for input, but harmless
+    SPIPins.pGPIOx = GPIOB; // Use GPIOB for SPI2
+    SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALT; // Set to alternate function mode
+    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5; // Alternate function for SPI2
+    SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // Push-pull output type
+    SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; // No pull-up or pull-down
+    SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST; // Fast speed
 
-    // LED configuration (PB0)
-    gpioB.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_0;
-    gpioB.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-    gpioB.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    gpioB.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-    gpioB.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
+    // Configure SPI2 pins
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_9; // NSS
+    GPIO_Init(&SPIPins);
 
-    // Enable clocks and initialize
-    GPIO_PeriClockControl(GPIOA, ENABLE);
-    GPIO_PeriClockControl(GPIOB, ENABLE);
-    GPIO_Init(&gpioA);
-    GPIO_Init(&gpioB);
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_10; // SCK
+    GPIO_Init(&SPIPins);
 
-    // Configure NVIC
-    GPIO_IRQPriorityConfig(IRQ_NO_EXTI3, 15); // Priority
-    GPIO_IRQInterruptConfig(IRQ_NO_EXTI3, ENABLE); // Enable
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14; // MISO
+    GPIO_Init(&SPIPins);
 
-    while (1) {} // Main loop
-}
-
-void EXTI3_IRQHandler() {
-
-	 Delay(); // Simple delay to debounce
-
-    GPIO_IRQHandler(GPIO_PIN_3); // Clear EXTI/NVIC pending bits
-    GPIO_ToggleOutputPin(GPIOB, GPIO_PIN_0); // Toggle LED
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_15; // MOSI
+    GPIO_Init(&SPIPins);
 
 }
+
+
