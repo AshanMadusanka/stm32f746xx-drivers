@@ -412,4 +412,5 @@ typedef struct {
 #define SPI_SR_FTLVL        11U
 
 #include "stm32f746xx_gpio_driver.h"
+#include "stm32f746xx_spi_driver.h"
 #endif //STM32F746XX_H
