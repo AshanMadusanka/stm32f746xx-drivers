@@ -7,3 +7,6 @@
 ../drivers/Src/stm32f746xx_spi_driver.c:125:6:SPI_IRQInterruptConfig	1
 ../drivers/Src/stm32f746xx_spi_driver.c:129:6:SPI_IRQPriorityConfig	1
 ../drivers/Src/stm32f746xx_spi_driver.c:133:6:SPI_IRQHandling	1
+../drivers/Src/stm32f746xx_spi_driver.c:138:6:SPI_PeripheralControl	2
+../drivers/Src/stm32f746xx_spi_driver.c:146:6:SPI_SSIConfig	2
+../drivers/Src/stm32f746xx_spi_driver.c:154:6:SPI_SSOEConfig	2

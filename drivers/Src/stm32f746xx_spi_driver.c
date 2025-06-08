@@ -134,3 +134,27 @@ void SPI_IRQHandling(SPI_Handle_t *pSPIHandle) {
     // Implementation for handling SPI interrupts
     // This function should check the status of the SPI peripheral and handle the interrupt accordingly
 }
+
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
+
+    if (EnorDi == ENABLE) {
+        pSPIx->CR1 |= (1 << SPI_CR1_SPE); // Set the SPE bit to enable the SPI peripheral
+    } else {
+        pSPIx->CR1 &= ~(1 << SPI_CR1_SPE); // Clear the SPE bit to disable the SPI peripheral
+    }
+}
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
+    if (EnorDi == ENABLE) {
+        pSPIx->CR1 |= (1 << SPI_CR1_SSI); // Set the SSI bit to enable internal slave select
+    } else {
+        pSPIx->CR1 &= ~(1 << SPI_CR1_SSI); // Clear the SSI bit to disable internal slave select
+    }
+}
+
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
+    if (EnorDi == ENABLE) {
+        pSPIx->CR2 |= (1 << SPI_CR2_SSOE); // Set the SSOE bit to enable software slave management
+    } else {
+        pSPIx->CR2 &= ~(1 << SPI_CR2_SSOE); // Clear the SSOE bit to disable software slave management
+    }
+}

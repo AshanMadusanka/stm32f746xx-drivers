@@ -29,10 +29,10 @@
  * PB15___>MOSI
  */
 void SPI_GpioInit();
-void SPI_Init();
+void SPI2_Inits();
 
 void Delay() {
-    for (uint32_t i = 0; i < 500000 / 2; i++) {
+    for (uint32_t i = 0; i < 5000000; i++) {
         // Simple delay loop
     }
 }
@@ -43,10 +43,20 @@ int main(void) {
     char user_data[] = "Hello world";
 
     SPI_GpioInit();
-    SPI_Init();
+    SPI2_Inits();
+
+    SPI_SSOEConfig(SPI2,ENABLE);
+
+    SPI_PeripheralControl(SPI2, ENABLE);
+
+    uint8_t data_length = strlen(user_data);
+    SPI_SendData(SPI2,&data_length,1);
     SPI_SendData(SPI2,(uint8_t*)user_data,strlen(user_data));
 
 
+   // SPI_PeripheralControl(SPI2, DISABLE);
+
+    while(1);
 
 }
 
@@ -69,24 +79,24 @@ void SPI_GpioInit() {
     SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_10; // SCK
     GPIO_Init(&SPIPins);
 
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14; // MISO
-    GPIO_Init(&SPIPins);
+    // SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14; // MISO
+    // GPIO_Init(&SPIPins);
 
     SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_15; // MOSI
     GPIO_Init(&SPIPins);
 }
 
-void SPI_Init() {
+void SPI2_Inits() {
     SPI_Handle_t SPI2Handle;
 
     SPI2Handle.pSPIx = SPI2;
     SPI2Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
     SPI2Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-    SPI2Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV2;
+    SPI2Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
     SPI2Handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
     SPI2Handle.SPIConfig.SPI_CPOL =SPI_CPOL_LOW;
     SPI2Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
-    SPI2Handle.SPIConfig.SPI_SSM = SPI_SSM_EN;
+    SPI2Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
 
     SPI_Init(&SPI2Handle);
 
