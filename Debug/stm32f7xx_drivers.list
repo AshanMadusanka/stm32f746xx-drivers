@@ -98,7 +98,6 @@ int main(void) {
  800021a:	b084      	sub	sp, #16
  800021c:	af00      	add	r7, sp, #0
 
-
     char user_data[] = "Hello world";
  800021e:	4a15      	ldr	r2, [pc, #84]	@ (8000274 <main+0x5c>)
  8000220:	1d3b      	adds	r3, r7, #4
@@ -107,15 +106,15 @@ int main(void) {
 
     SPI_GpioInit();
  8000228:	f000 f828 	bl	800027c <SPI_GpioInit>
-    SPI2_Inits();
- 800022c:	f000 f84e 	bl	80002cc <SPI2_Inits>
+    SPI1_Inits();
+ 800022c:	f000 f84e 	bl	80002cc <SPI1_Inits>
 
-    SPI_SSOEConfig(SPI2,ENABLE);
+    SPI_SSOEConfig(SPI1, ENABLE);
  8000230:	2101      	movs	r1, #1
  8000232:	4811      	ldr	r0, [pc, #68]	@ (8000278 <main+0x60>)
  8000234:	f000 fce3 	bl	8000bfe <SPI_SSOEConfig>
 
-    SPI_PeripheralControl(SPI2, ENABLE);
+    SPI_PeripheralControl(SPI1, ENABLE);
  8000238:	2101      	movs	r1, #1
  800023a:	480f      	ldr	r0, [pc, #60]	@ (8000278 <main+0x60>)
  800023c:	f000 fcc3 	bl	8000bc6 <SPI_PeripheralControl>
@@ -127,13 +126,13 @@ int main(void) {
  8000248:	4603      	mov	r3, r0
  800024a:	b2db      	uxtb	r3, r3
  800024c:	70fb      	strb	r3, [r7, #3]
-    SPI_SendData(SPI2,&data_length,1);
+    SPI_SendData(SPI1, &data_length, 1);
  800024e:	1cfb      	adds	r3, r7, #3
  8000250:	2201      	movs	r2, #1
  8000252:	4619      	mov	r1, r3
  8000254:	4808      	ldr	r0, [pc, #32]	@ (8000278 <main+0x60>)
  8000256:	f000 fc7f 	bl	8000b58 <SPI_SendData>
-    SPI_SendData(SPI2,(uint8_t*)user_data,strlen(user_data));
+    SPI_SendData(SPI1, (uint8_t*)user_data, strlen(user_data));
  800025a:	1d3b      	adds	r3, r7, #4
  800025c:	4618      	mov	r0, r3
  800025e:	f7ff ffd3 	bl	8000208 <strlen>
@@ -143,20 +142,18 @@ int main(void) {
  8000268:	4803      	ldr	r0, [pc, #12]	@ (8000278 <main+0x60>)
  800026a:	f000 fc75 	bl	8000b58 <SPI_SendData>
 
-
-   // SPI_PeripheralControl(SPI2, DISABLE);
+    // SPI_PeripheralControl(SPI1, DISABLE);
 
     while(1);
  800026e:	bf00      	nop
  8000270:	e7fd      	b.n	800026e <main+0x56>
  8000272:	bf00      	nop
  8000274:	08000c98 	.word	0x08000c98
- 8000278:	40003800 	.word	0x40003800
+ 8000278:	40013000 	.word	0x40013000
 
 0800027c <SPI_GpioInit>:
 
 }
-
 
 void SPI_GpioInit() {
  800027c:	b580      	push	{r7, lr}
@@ -165,13 +162,13 @@ void SPI_GpioInit() {
 
     GPIO_Handle_t SPIPins;
 
-    SPIPins.pGPIOx = GPIOB; // Use GPIOB for SPI2
+    SPIPins.pGPIOx = GPIOA; // Use GPIOA for SPI1
  8000282:	4b11      	ldr	r3, [pc, #68]	@ (80002c8 <SPI_GpioInit+0x4c>)
  8000284:	607b      	str	r3, [r7, #4]
     SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALT; // Set to alternate function mode
  8000286:	2302      	movs	r3, #2
  8000288:	727b      	strb	r3, [r7, #9]
-    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5; // Alternate function for SPI2
+    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5; // Alternate function for SPI1
  800028a:	2305      	movs	r3, #5
  800028c:	737b      	strb	r3, [r7, #13]
     SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // Push-pull output type
@@ -184,28 +181,28 @@ void SPI_GpioInit() {
  8000296:	2302      	movs	r3, #2
  8000298:	72bb      	strb	r3, [r7, #10]
 
-    // Configure SPI2 pins
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_9; // NSS
- 800029a:	2309      	movs	r3, #9
+    // Configure SPI1 pins
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_4; // NSS
+ 800029a:	2304      	movs	r3, #4
  800029c:	723b      	strb	r3, [r7, #8]
     GPIO_Init(&SPIPins);
  800029e:	1d3b      	adds	r3, r7, #4
  80002a0:	4618      	mov	r0, r3
  80002a2:	f000 f973 	bl	800058c <GPIO_Init>
 
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_10; // SCK
- 80002a6:	230a      	movs	r3, #10
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_5; // SCK
+ 80002a6:	2305      	movs	r3, #5
  80002a8:	723b      	strb	r3, [r7, #8]
     GPIO_Init(&SPIPins);
  80002aa:	1d3b      	adds	r3, r7, #4
  80002ac:	4618      	mov	r0, r3
  80002ae:	f000 f96d 	bl	800058c <GPIO_Init>
 
-    // SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14; // MISO
+    // SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6; // MISO
     // GPIO_Init(&SPIPins);
 
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_15; // MOSI
- 80002b2:	230f      	movs	r3, #15
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7; // MOSI
+ 80002b2:	2307      	movs	r3, #7
  80002b4:	723b      	strb	r3, [r7, #8]
     GPIO_Init(&SPIPins);
  80002b6:	1d3b      	adds	r3, r7, #4
@@ -217,54 +214,51 @@ void SPI_GpioInit() {
  80002c2:	46bd      	mov	sp, r7
  80002c4:	bd80      	pop	{r7, pc}
  80002c6:	bf00      	nop
- 80002c8:	40020400 	.word	0x40020400
+ 80002c8:	40020000 	.word	0x40020000
 
-080002cc <SPI2_Inits>:
+080002cc <SPI1_Inits>:
 
-void SPI2_Inits() {
+void SPI1_Inits() {
  80002cc:	b580      	push	{r7, lr}
  80002ce:	b084      	sub	sp, #16
  80002d0:	af00      	add	r7, sp, #0
-    SPI_Handle_t SPI2Handle;
+    SPI_Handle_t SPI1Handle;
 
-    SPI2Handle.pSPIx = SPI2;
- 80002d2:	4b0c      	ldr	r3, [pc, #48]	@ (8000304 <SPI2_Inits+0x38>)
+    SPI1Handle.pSPIx = SPI1;
+ 80002d2:	4b0c      	ldr	r3, [pc, #48]	@ (8000304 <SPI1_Inits+0x38>)
  80002d4:	607b      	str	r3, [r7, #4]
-    SPI2Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
+    SPI1Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
  80002d6:	2301      	movs	r3, #1
  80002d8:	727b      	strb	r3, [r7, #9]
-    SPI2Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
+    SPI1Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
  80002da:	2301      	movs	r3, #1
  80002dc:	723b      	strb	r3, [r7, #8]
-    SPI2Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
+    SPI1Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
  80002de:	2302      	movs	r3, #2
  80002e0:	72bb      	strb	r3, [r7, #10]
-    SPI2Handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
+    SPI1Handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
  80002e2:	2300      	movs	r3, #0
  80002e4:	72fb      	strb	r3, [r7, #11]
-    SPI2Handle.SPIConfig.SPI_CPOL =SPI_CPOL_LOW;
+    SPI1Handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
  80002e6:	2300      	movs	r3, #0
  80002e8:	733b      	strb	r3, [r7, #12]
-    SPI2Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
+    SPI1Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
  80002ea:	2300      	movs	r3, #0
  80002ec:	737b      	strb	r3, [r7, #13]
-    SPI2Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
+    SPI1Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
  80002ee:	2300      	movs	r3, #0
  80002f0:	73bb      	strb	r3, [r7, #14]
 
-    SPI_Init(&SPI2Handle);
+    SPI_Init(&SPI1Handle);
  80002f2:	1d3b      	adds	r3, r7, #4
  80002f4:	4618      	mov	r0, r3
  80002f6:	f000 fbc7 	bl	8000a88 <SPI_Init>
-
-
-}
  80002fa:	bf00      	nop
  80002fc:	3710      	adds	r7, #16
  80002fe:	46bd      	mov	sp, r7
  8000300:	bd80      	pop	{r7, pc}
  8000302:	bf00      	nop
- 8000304:	40003800 	.word	0x40003800
+ 8000304:	40013000 	.word	0x40013000
 
 08000308 <Reset_Handler>:
 

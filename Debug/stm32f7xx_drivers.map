@@ -690,9 +690,9 @@ LOAD C:/ST/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .text.SPI_GpioInit
                 0x0800027c       0x50 ./Src/main.o
                 0x0800027c                SPI_GpioInit
- .text.SPI2_Inits
+ .text.SPI1_Inits
                 0x080002cc       0x3c ./Src/main.o
-                0x080002cc                SPI2_Inits
+                0x080002cc                SPI1_Inits
  .text.Reset_Handler
                 0x08000308       0x50 ./Startup/startup_stm32f746zgtx.o
                 0x08000308                Reset_Handler

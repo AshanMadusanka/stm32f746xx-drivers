@@ -22,14 +22,14 @@
 #include "stm32f746xx.h"
 
 
-/** SPI2 Pins  ALT5
- * PB9 --->NSS
- * PB10--->SCK
- * PB14--->MISO
- * PB15___>MOSI
+/** SPI1 Pins  ALT5
+ * PA4 --->NSS
+ * PA5--->SCK
+ * PA6--->MISO
+ * PA7--->MOSI
  */
 void SPI_GpioInit();
-void SPI2_Inits();
+void SPI1_Inits();
 
 void Delay() {
     for (uint32_t i = 0; i < 5000000; i++) {
@@ -39,66 +39,61 @@ void Delay() {
 
 int main(void) {
 
-
     char user_data[] = "Hello world";
 
     SPI_GpioInit();
-    SPI2_Inits();
+    SPI1_Inits();
 
-    SPI_SSOEConfig(SPI2,ENABLE);
+    SPI_SSOEConfig(SPI1, ENABLE);
 
-    SPI_PeripheralControl(SPI2, ENABLE);
+    SPI_PeripheralControl(SPI1, ENABLE);
 
     uint8_t data_length = strlen(user_data);
-    SPI_SendData(SPI2,&data_length,1);
-    SPI_SendData(SPI2,(uint8_t*)user_data,strlen(user_data));
+    SPI_SendData(SPI1, &data_length, 1);
+    SPI_SendData(SPI1, (uint8_t*)user_data, strlen(user_data));
 
-
-   // SPI_PeripheralControl(SPI2, DISABLE);
+    // SPI_PeripheralControl(SPI1, DISABLE);
 
     while(1);
 
 }
 
-
 void SPI_GpioInit() {
 
     GPIO_Handle_t SPIPins;
 
-    SPIPins.pGPIOx = GPIOB; // Use GPIOB for SPI2
+    SPIPins.pGPIOx = GPIOA; // Use GPIOA for SPI1
     SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALT; // Set to alternate function mode
-    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5; // Alternate function for SPI2
+    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5; // Alternate function for SPI1
     SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // Push-pull output type
     SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; // No pull-up or pull-down
     SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST; // Fast speed
 
-    // Configure SPI2 pins
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_9; // NSS
+    // Configure SPI1 pins
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_4; // NSS
     GPIO_Init(&SPIPins);
 
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_10; // SCK
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_5; // SCK
     GPIO_Init(&SPIPins);
 
-    // SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14; // MISO
+    // SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6; // MISO
     // GPIO_Init(&SPIPins);
 
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_15; // MOSI
+    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7; // MOSI
     GPIO_Init(&SPIPins);
 }
 
-void SPI2_Inits() {
-    SPI_Handle_t SPI2Handle;
+void SPI1_Inits() {
+    SPI_Handle_t SPI1Handle;
 
-    SPI2Handle.pSPIx = SPI2;
-    SPI2Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
-    SPI2Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-    SPI2Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
-    SPI2Handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
-    SPI2Handle.SPIConfig.SPI_CPOL =SPI_CPOL_LOW;
-    SPI2Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
-    SPI2Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
+    SPI1Handle.pSPIx = SPI1;
+    SPI1Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
+    SPI1Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
+    SPI1Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
+    SPI1Handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
+    SPI1Handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
+    SPI1Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
+    SPI1Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
 
-    SPI_Init(&SPI2Handle);
-
-
+    SPI_Init(&SPI1Handle);
 }
