@@ -41,6 +41,7 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
 void SPI_Init(SPI_Handle_t *pSPIHandle) {
 
     uint32_t tempreg = 0;
+    uint32_t tempreg2 = 0;
     // Enable the peripheral clock
     SPI_PeriClockControl(pSPIHandle->pSPIx, ENABLE);
 
@@ -64,7 +65,7 @@ void SPI_Init(SPI_Handle_t *pSPIHandle) {
     tempreg |= (pSPIHandle->SPIConfig.SPI_SclkSpeed << SPI_CR1_BR);
 
     // Configure the SPI data frame format
-    tempreg |=(pSPIHandle->SPIConfig.SPI_DFF << SPI_CR1_DFF);
+    tempreg2 |=(pSPIHandle->SPIConfig.SPI_DS << SPI_CR2_DS);
 
     // Configure the SPI software slave management
     tempreg |= (pSPIHandle->SPIConfig.SPI_CPOL << SPI_CR1_CPOL);
@@ -73,6 +74,7 @@ void SPI_Init(SPI_Handle_t *pSPIHandle) {
     tempreg |= (pSPIHandle->SPIConfig.SPI_CPHA << SPI_CR1_CPHA);
 
     pSPIHandle->pSPIx->CR1 = tempreg;
+    pSPIHandle->pSPIx->CR2 |= tempreg2;
 
 }
 
@@ -95,8 +97,8 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
                     // Wait until TXE (Transmit buffer empty) flag is set
                     while (SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAGRESET);
 
-                    // Check if DFF (Data Frame Format) is 16-bit
-                    if (pSPIx->CR1 & (1 << SPI_CR1_DFF)) {
+                    // Check if DS (Data Frame Format) is 16-bit
+                    if(((pSPIx->CR2 >> SPI_CR2_DS) & 0xF) == SPI_DS_16BITS) {
 
                         // Load 16 bits of data into the data register
                         pSPIx->DR = *(uint16_t*)pTxBuffer;
@@ -108,7 +110,9 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
                     }
                     else {
                         // Load 8 bits of data into the data register
-                        pSPIx->DR = *pTxBuffer;
+                        // Note: The data register is 16 bits wide, so we can write 8 bits directly
+                      *((__vo uint8_t*)&pSPIx->DR) = *pTxBuffer;
+
                         // Decrement length by 1 byte
                         Len--;
                         // Increment buffer pointer by 1 byte
@@ -123,11 +127,11 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
     // Loop until all data is sent
     while (Len > 0) {
 
-        // Wait until TXE (Transmit buffer empty) flag is set
-        while (SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAGRESET);
+        // Wait until RXNE (Transmit buffer empty) flag is set
+        while (SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAGRESET);
 
-        // Check if DFF (Data Frame Format) is 16-bit
-        if (pSPIx->CR1 & (1 << SPI_CR1_DFF)) {
+        // Check if DS is 16-bit
+        if(((pSPIx->CR2 >> SPI_CR2_DS) & 0xF) == SPI_DS_16BITS) {
 
             // Load pTxBuffer with 16 bits of data from the data register
             *((uint16_t*)pTxBuffer )= pSPIx->DR ;

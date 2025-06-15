@@ -15,7 +15,7 @@ typedef struct {
     uint8_t SPI_DeviceMode;        /*!< Specifies the SPI device mode. Possible values from @ref SPI_Device_Mode */
     uint8_t SPI_BusConfig;         /*!< Specifies the SPI bus configuration. Possible values from @ref SPI_Bus_Config */
     uint8_t SPI_SclkSpeed;         /*!< Specifies the SPI clock speed. Possible values from @ref SPI_Sclk_Speed */
-    uint8_t SPI_DFF;               /*!< Specifies the SPI data frame format. Possible values from @ref SPI_Data_Frame_Format */
+    uint8_t SPI_DS;               /*!< Specifies the SPI data frame format. Possible values from @ref SPI_Data_Frame_Format */
     uint8_t SPI_CPOL;              /*!< Specifies the SPI clock polarity. Possible values from @ref SPI_Clock_Polarity */
     uint8_t SPI_CPHA;              /*!< Specifies the SPI clock phase. Possible values from @ref SPI_Clock_Phase */
     uint8_t SPI_SSM;               /*!< Specifies the SPI software slave management. Possible values from @ref SPI_Software_Slave_Management */
@@ -73,8 +73,8 @@ typedef struct {
  * @note These macros define the possible data frame formats for the SPI peripheral.
  */
 
-#define SPI_DFF_8BITS           0 /*!< 8-bit data frame format */
-#define SPI_DFF_16BITS          1 /*!< 16-bit data frame format */
+#define SPI_DS_8BITS           7 /*!< 8-bit data frame format */
+#define SPI_DS_16BITS          15 /*!< 16-bit data frame format */
 
 /**
  * @brief SPI Clock Polarity
@@ -169,7 +169,7 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
  * @param pRxBuffer Pointer to the receive buffer
  * @param Len Length of the data to be received
  */
-void SPI_ReceiveData(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t Len);
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
 
 /**
  * @brief Configures the interrupt for the given IRQ number

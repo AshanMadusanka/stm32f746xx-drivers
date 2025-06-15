@@ -374,7 +374,7 @@ typedef struct {
 #define SPI_CR1_SSI         8U
 #define SPI_CR1_SSM         9U
 #define SPI_CR1_RXONLY      10U
-#define SPI_CR1_DFF         11U
+#define SPI_CR1_CRCL        11U
 #define SPI_CR1_CRCNEXT     12U
 #define SPI_CR1_CRCEN       13U
 #define SPI_CR1_BIDIOE      14U

@@ -32,14 +32,14 @@ void SPI_GpioInit();
 void SPI1_Inits();
 
 void Delay() {
-    for (uint32_t i = 0; i < 5000000; i++) {
+    for (uint32_t i = 0; i < 500000; i++) {
         // Simple delay loop
     }
 }
 
 int main(void) {
 
-    char user_data[] = "Hello world";
+    char user_data[] = "Hello world.....";
 
     SPI_GpioInit();
     SPI1_Inits();
@@ -48,13 +48,23 @@ int main(void) {
 
     SPI_PeripheralControl(SPI1, ENABLE);
 
+    while(1){
+
+
     uint8_t data_length = strlen(user_data);
     SPI_SendData(SPI1, &data_length, 1);
-    SPI_SendData(SPI1, (uint8_t*)user_data, strlen(user_data));
+   // Delay();
+    SPI_SendData(SPI1, ((uint8_t*)user_data), strlen(user_data));
 
-    // SPI_PeripheralControl(SPI1, DISABLE);
+	//lets confirm SPI is not busy
+	while( SPI_GetFlagStatus(SPI1,SPI_BUSY_FLAG) );
 
-    while(1);
+	//Disable the SPI2 peripheral
+	//SPI_PeripheralControl(SPI1,DISABLE);
+	Delay();
+    }
+
+ //   while(1);
 
 }
 
@@ -76,8 +86,8 @@ void SPI_GpioInit() {
     SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_5; // SCK
     GPIO_Init(&SPIPins);
 
-    // SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6; // MISO
-    // GPIO_Init(&SPIPins);
+     SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6; // MISO
+     GPIO_Init(&SPIPins);
 
     SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7; // MOSI
     GPIO_Init(&SPIPins);
@@ -89,8 +99,8 @@ void SPI1_Inits() {
     SPI1Handle.pSPIx = SPI1;
     SPI1Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
     SPI1Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-    SPI1Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;
-    SPI1Handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
+    SPI1Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV32;
+    SPI1Handle.SPIConfig.SPI_DS = SPI_DS_8BITS;
     SPI1Handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
     SPI1Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
     SPI1Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
