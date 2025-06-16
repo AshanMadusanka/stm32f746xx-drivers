@@ -73,6 +73,13 @@ void SPI_Init(SPI_Handle_t *pSPIHandle) {
     // Configure the SPI clock polarity
     tempreg |= (pSPIHandle->SPIConfig.SPI_CPHA << SPI_CR1_CPHA);
 
+    // Set FRXTH if using 8-bit data size
+    if (pSPIHandle->SPIConfig.SPI_DS == SPI_DS_8BITS) {
+        pSPIHandle->pSPIx->CR2 |= (1 << SPI_CR2_FRXTH);
+    } else {
+        pSPIHandle->pSPIx->CR2 &= ~(1 << SPI_CR2_FRXTH);
+    }
+
     pSPIHandle->pSPIx->CR1 = tempreg;
     pSPIHandle->pSPIx->CR2 |= tempreg2;
 
@@ -122,7 +129,7 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
 
             }
 
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) {
     // Implementation for receiving data through SPI
     // Loop until all data is sent
     while (Len > 0) {
@@ -134,20 +141,20 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
         if(((pSPIx->CR2 >> SPI_CR2_DS) & 0xF) == SPI_DS_16BITS) {
 
             // Load pTxBuffer with 16 bits of data from the data register
-            *((uint16_t*)pTxBuffer )= pSPIx->DR ;
+            *((uint16_t*)pRxBuffer )= pSPIx->DR ;
             // Decrement length by 2 bytes
             Len--;
             Len--;
             // Increment buffer pointer by 2 bytes
-            (uint16_t*)pTxBuffer++;
+            (uint16_t*)pRxBuffer++;
         }
         else {
             // Load pTxBuffer with 8 bits of data from the data register
-            *pTxBuffer = pSPIx->DR;
+            *pRxBuffer = *((__vo uint8_t*)&pSPIx->DR);
             // Decrement length by 1 byte
             Len--;
             // Increment buffer pointer by 1 byte
-            pTxBuffer++;
+            pRxBuffer++;
         }
     }
 }

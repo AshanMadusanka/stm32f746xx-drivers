@@ -169,7 +169,7 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
  * @param pRxBuffer Pointer to the receive buffer
  * @param Len Length of the data to be received
  */
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len);
 
 /**
  * @brief Configures the interrupt for the given IRQ number

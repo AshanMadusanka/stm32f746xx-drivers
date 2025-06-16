@@ -21,6 +21,28 @@
 
 #include "stm32f746xx.h"
 
+//extern void initialise_monitor_handles();
+
+//command codes
+#define COMMAND_LED_CTRL      		0x50
+#define COMMAND_SENSOR_READ      	0x51
+#define COMMAND_LED_READ      		0x52
+#define COMMAND_PRINT      			0x53
+#define COMMAND_ID_READ      		0x54
+
+#define LED_ON     1
+#define LED_OFF    0
+
+//arduino analog pins
+#define ANALOG_PIN0 	0
+#define ANALOG_PIN1 	1
+#define ANALOG_PIN2 	2
+#define ANALOG_PIN3 	3
+#define ANALOG_PIN4 	4
+
+//arduino led
+
+#define LED_PIN  9
 
 /** SPI1 Pins  ALT5
  * PA4 --->NSS
@@ -30,41 +52,54 @@
  */
 void SPI_GpioInit();
 void SPI1_Inits();
+void Button_Init();
+uint8_t SPI_VerifyResponse(uint8_t ackbyte);
 
 void Delay() {
-    for (uint32_t i = 0; i < 500000; i++) {
+    for (uint32_t i = 0; i < 500000/2; i++) {
         // Simple delay loop
     }
 }
 
 int main(void) {
 
-    char user_data[] = "Hello world.....";
+    uint8_t dummy_write = 0xff;
+    uint8_t dummy_read;
 
+    Button_Init();
     SPI_GpioInit();
     SPI1_Inits();
 
     SPI_SSOEConfig(SPI1, ENABLE);
 
-    SPI_PeripheralControl(SPI1, ENABLE);
 
     while(1){
+        while (GPIO_ReadFromInputPin(GPIOC,GPIO_PIN_13) == GPIO_PIN_RESET); // Wait for button press
+        Delay(); // Debounce delay
+        SPI_PeripheralControl(SPI1, ENABLE);
+
+        uint8_t commandcode = COMMAND_LED_CTRL;
+        uint8_t ackbyte;
+        uint8_t args[2];
 
 
-    uint8_t data_length = strlen(user_data);
-    SPI_SendData(SPI1, &data_length, 1);
-   // Delay();
-    SPI_SendData(SPI1, ((uint8_t*)user_data), strlen(user_data));
+        SPI_SendData(SPI1, &commandcode, 1);
+        SPI_ReceiveData(SPI1, &dummy_read, 1); // Read dummy byte to clear the RXNE flag
+        SPI_SendData(SPI1, &dummy_write, 1); // Send dummy byte to fetch from slave
+        SPI_ReceiveData(SPI1, &ackbyte, 1); // Receive acknowledgment byte
 
-	//lets confirm SPI is not busy
+        if (SPI_VerifyResponse(ackbyte)) {
+
+            args[0] = LED_PIN; // LED pin
+            args[1] = LED_ON; // LED state (ON)
+
+            SPI_SendData(SPI1, args, 2); // Send LED control command with arguments
+        }
+
+	//let's confirm SPI is not busy
 	while( SPI_GetFlagStatus(SPI1,SPI_BUSY_FLAG) );
-
-	//Disable the SPI2 peripheral
-	//SPI_PeripheralControl(SPI1,DISABLE);
-	Delay();
+	SPI_PeripheralControl(SPI1,DISABLE);
     }
-
- //   while(1);
 
 }
 
@@ -106,4 +141,27 @@ void SPI1_Inits() {
     SPI1Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
 
     SPI_Init(&SPI1Handle);
+}
+void Button_Init() {
+    GPIO_Handle_t GpioButton;
+
+    GpioButton.pGPIOx = GPIOC; // Use GPIOC for the button
+    GpioButton.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_13; // Button pin
+    GpioButton.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN; // Input mode
+    GpioButton.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; // No pull-up or pull-down
+    GpioButton.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST; // Fast speed
+
+    GPIO_Init(&GpioButton);
+}
+
+uint8_t SPI_VerifyResponse(uint8_t ackbyte)
+{
+
+    if(ackbyte == (uint8_t)0xF5)
+    {
+        //ack
+        return 1;
+    }
+
+    return 0;
 }
