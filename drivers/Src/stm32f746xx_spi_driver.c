@@ -161,6 +161,39 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) {
 
 void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi) {
     // Implementation for configuring SPI interrupt
+
+    if(EnorDi == ENABLE) {
+
+        if(IRQNumber <=31) {
+
+            *NVIC_ISER0 |= (1 << IRQNumber);
+        }
+        else if(IRQNumber >= 32 && IRQNumber <64) {
+
+            *NVIC_ISER1 |= (1 << (IRQNumber % 32));
+        }
+        else if(IRQNumber >= 64 && IRQNumber <96) {
+
+            *NVIC_ISER2 |= (1 << (IRQNumber % 32));
+        }
+    }
+    else {
+
+        if(IRQNumber <=31) {
+
+            *NVIC_ICER0 |= (1 << IRQNumber);
+        }
+        else if(IRQNumber >= 32 && IRQNumber <64) {
+
+            *NVIC_ICER1 |= (1 << (IRQNumber % 32));
+        }
+        else if(IRQNumber >= 64 && IRQNumber <96) {
+
+            *NVIC_ICER2 |= (1 << (IRQNumber % 32));
+        }
+    }
+
+
 }
 
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority) {
