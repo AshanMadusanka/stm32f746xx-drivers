@@ -29,6 +29,12 @@ typedef struct {
 
     SPI_RegDef_t *pSPIx;           /*!< Pointer to the SPIx peripheral base address */
     SPI_Config_t SPIConfig;        /*!< Configuration settings for the SPI peripheral */
+    uint8_t *pTxBuffer;           /*!< Pointer to the transmit buffer */
+    uint8_t *pRxBuffer;           /*!< Pointer to the receive buffer */
+    uint32_t TxLen;               /*!< Length of data to be transmitted */
+    uint32_t RxLen;               /*!< Length of data to be received */
+    uint8_t TxState;             /*!< State of the transmit operation */
+    uint8_t RxState;             /*!< State of the receive operation */
 
 } SPI_Handle_t;
 
@@ -115,10 +121,15 @@ typedef struct {
 #define SPI_UDR_FLAG (1<< SPI_SR_UDR)
 #define SPI_CHSIDE_FLAG (1<< SPI_SR_CHSIDE)
 
+#define SPI_READY 0
+#define SPI_BUSY_IN_RX 1
+#define SPI_BUSY_IN_TX 2
 
 
-
-
+#define SPI_EVENT_TX_CMPLT 1
+#define SPI_EVENT_RX_CMPLT 2
+#define SPI_EVENT_OVR_ERR  3
+#define SPI_EVENT_CRC_ERR 4
 
 /**
  * @brief Enables or disables the peripheral clock for the given SPI peripheral
@@ -152,7 +163,9 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
  */
 uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx,uint32_t FlagName);
 
-
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx);
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle);
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle);
 /**
  * @brief Sends data through the SPI peripheral
  *
@@ -194,7 +207,15 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
  */
 void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
 
+
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t Len);
+uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t Len);
+
 void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+
+
+
+void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv);
 #endif //STM32F746XX_SPI_DRIVER_H
