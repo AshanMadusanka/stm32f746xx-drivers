@@ -46,7 +46,8 @@ void SPI_GpioInit();
 void SPI1_Inits();
 void SPI1_IRQHandler(void);
 void Slave_GPIO_InterruptPinInit();
-//void EXTI9_5_IRQHandler(void);
+
+
 
 
 void Delay() {
@@ -56,7 +57,6 @@ void Delay() {
 }
 
 int main(void) {
-
 
     uint8_t dummy = 0xff;
 

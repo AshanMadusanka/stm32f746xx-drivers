@@ -247,6 +247,11 @@ typedef struct {
 #define SPI5 ((SPI_RegDef_t *)SPI5_BASEADDR)
 #define SPI6 ((SPI_RegDef_t *)SPI6_BASEADDR)
 
+#define I2C1 ((I2C_RegDef_t *)I2C1_BASEADDR)
+#define I2C2 ((I2C_RegDef_t *)I2C2_BASEADDR)
+#define I2C3 ((I2C_RegDef_t *)I2C3_BASEADDR)
+#define I2C4 ((I2C_RegDef_t *)I2C4_BASEADDR)
+
 /*Clock Enable Macros for GPIOx Peripherals*/
 
 #define SYSCFG_PCLK_EN() (RCC->APB2ENR |= (1 << 14))
@@ -418,6 +423,71 @@ typedef struct {
 #define SPI_SR_FRLVL        9U
 #define SPI_SR_FTLVL        11U
 
+/** A bit of position definition of I2C CR1 Register **/
+
+#define I2C_CR1_PE          0U
+#define I2C_CR1_TXIE        1U
+#define I2C_CR1_RXIE        2U
+#define I2C_CR1_ADDRIE      3U
+#define I2C_CR1_NACKIE      4U
+#define I2C_CR1_STOPIE      5U
+#define I2C_CR1_TCIE        6U
+#define I2C_CR1_ERRIE       7U
+#define I2C_CR1_DNF         8U
+#define I2C_CR1_ANFOFF      12U
+#define I2C_CR1_TXDMAEN     14U
+#define I2C_CR1_RXDMAEN     15U
+#define I2C_CR1_SBC         16U
+#define I2C_CR1_NOSTRETCH   17U
+#define I2C_CR1_GCEN        19U
+#define I2C_CR1_SMBHEN     20U
+#define I2C_CR1_SMBDEN     21U
+#define I2C_CR1_ALERT      22U
+#define I2C_CR1_PECEN      23U
+
+/** A bit of position definition of I2C CR2 Register **/
+
+#define I2C_CR2_SADD        0U
+#define I2C_CR2_RD_WRN      10U
+#define I2C_CR2_ADD10       11U
+#define I2C_CR2_HEAD10R     12U
+#define I2C_CR2_START       13U
+#define I2C_CR2_STOP        14U
+#define I2C_CR2_NACK        15U
+#define I2C_CR2_NBYTES      16U
+#define I2C_CR2_RELOAD      24U
+#define I2C_CR2_AUTOEND     25U
+#define I2C_CR2_PECBYTE     26U
+
+/** A bit of position definition of I2C ISR Register **/
+
+#define I2C_ISR_TXE         0U
+#define I2C_ISR_TXIS        1U
+#define I2C_ISR_RXNE        2U
+#define I2C_ISR_ADDR        3U
+#define I2C_ISR_NACKF       4U
+#define I2C_ISR_STOPF       5U
+#define I2C_ISR_TC          6U
+#define I2C_ISR_TCR         7U
+#define I2C_ISR_BERR        8U
+#define I2C_ISR_ARLO        9U
+#define I2C_ISR_OVR         10U
+#define I2C_ISR_PECERR      11U
+#define I2C_ISR_TIMEOUT     12U
+#define I2C_ISR_ALERT       13U
+#define I2C_ISR_BUSY        15U
+#define I2C_ISR_DIR         16U
+#define I2C_ISR_ADDCODE     17U
+
+/** A bit of position definition of I2C TIMINGR Register **/
+
+#define I2C_TIMINGR_SCLL    0U
+#define I2C_TIMINGR_SCLH    8U
+#define I2C_TIMINGR_SDADEL  16U
+#define I2C_TIMINGR_SCLDEL  20U
+#define I2C_TIMINGR_PRESC   28U
+
 #include "stm32f746xx_gpio_driver.h"
+#include "stm32f746xx_i2c_driver.h"
 #include "stm32f746xx_spi_driver.h"
 #endif //STM32F746XX_H

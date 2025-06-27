@@ -14,4 +14,6 @@ add_executable(stm32f7xx_drivers
         drivers/Inc/stm32f746xx_gpio_driver.h
         drivers/Src/stm32f746xx_gpio_driver.c
         drivers/Inc/stm32f746xx_spi_driver.h
-        drivers/Src/stm32f746xx_spi_driver.c)
+        drivers/Src/stm32f746xx_spi_driver.c
+        drivers/Src/stm32f746xx_i2c_driver.c
+        drivers/Inc/stm32f746xx_i2c_driver.h)
