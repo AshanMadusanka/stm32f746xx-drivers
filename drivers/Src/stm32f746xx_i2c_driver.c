@@ -50,6 +50,15 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t L
 
  // 1. Clear and configure CR2 with address, byte count, and direction
     uint32_t temp = pI2CHandle->pI2Cx->CR2;
+
+    /**
+     * Clear the SADD (slave address), NBYTES (number of bytes), and RD_WRN (read/write) fields in the I2C_CR2 register.
+     * This prepares the register for setting new values for these fields before initiating an I2C transfer.
+     * - SADD: 7 bits for slave address
+     * - NBYTES: 8 bits for number of bytes to transfer
+     * - RD_WRN: 1 (set) for read
+     * - RD_WRN: 0 (clear) for write
+     */
     temp &= ~((0x7F << I2C_CR2_SADD) | (0xFF << I2C_CR2_NBYTES) | (1 << I2C_CR2_RD_WRN));
     temp |= ((SlaveAddr << 1) << I2C_CR2_SADD); // 7-bit address shifted
     temp |= (Len << I2C_CR2_NBYTES);            // Number of bytes

@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  00002d65  00000000  00000000  00003b79  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000190a  00000000  00000000  000068de  2**0
+ 17 .debug_line   0000190c  00000000  00000000  000068de  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0000a678  00000000  00000000  000081e8  2**0
+ 18 .debug_str    0000a678  00000000  00000000  000081ea  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  00012860  2**0
+ 19 .comment      00000043  00000000  00000000  00012862  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000003d0  00000000  00000000  000128a4  2**2
+ 20 .debug_frame  000003d0  00000000  00000000  000128a8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000004f  00000000  00000000  00012c74  2**0
+ 21 .debug_line_str 0000004f  00000000  00000000  00012c78  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1384,18 +1384,23 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t L
  8000a3c:	681b      	ldr	r3, [r3, #0]
  8000a3e:	685b      	ldr	r3, [r3, #4]
  8000a40:	613b      	str	r3, [r7, #16]
+     * - SADD: 7 bits for slave address
+     * - NBYTES: 8 bits for number of bytes to transfer
+     * - RD_WRN: 1 (set) for read
+     * - RD_WRN: 0 (clear) for write
+     */
     temp &= ~((0x7F << I2C_CR2_SADD) | (0xFF << I2C_CR2_NBYTES) | (1 << I2C_CR2_RD_WRN));
  8000a42:	693a      	ldr	r2, [r7, #16]
  8000a44:	4b21      	ldr	r3, [pc, #132]	@ (8000acc <I2C_MasterSendData+0xa0>)
  8000a46:	4013      	ands	r3, r2
  8000a48:	613b      	str	r3, [r7, #16]
-   // temp |= ((SlaveAddr << 1) << I2C_CR2_SADD); // 7-bit address shifted
-    temp |= (Len << I2C_CR2_NBYTES);            // Number of bytes
- 8000a4a:	687b      	ldr	r3, [r7, #4]
- 8000a4c:	041b      	lsls	r3, r3, #16
+    temp |= ((SlaveAddr << 1) << I2C_CR2_SADD); // 7-bit address shifted
+ 8000a4a:	78fb      	ldrb	r3, [r7, #3]
+ 8000a4c:	005b      	lsls	r3, r3, #1
  8000a4e:	693a      	ldr	r2, [r7, #16]
  8000a50:	4313      	orrs	r3, r2
  8000a52:	613b      	str	r3, [r7, #16]
+   // temp |= (Len << I2C_CR2_NBYTES);            // Number of bytes
     temp |= (1 << I2C_CR2_AUTOEND);            // Auto-end mode
  8000a54:	693b      	ldr	r3, [r7, #16]
  8000a56:	f043 7300 	orr.w	r3, r3, #33554432	@ 0x2000000
