@@ -4,6 +4,8 @@
 
 #include "stm32f746xx_i2c_driver.h"
 static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx);
+static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
+static  void I2C_ExecuteAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr);
 void I2C_Init(I2C_Handle_t *pI2CHandle) {
 
     uint32_t tempreg = 0;
@@ -42,13 +44,63 @@ void I2C_Init(I2C_Handle_t *pI2CHandle) {
 }
 
 void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t Sr) {
-    // Generate START condition
+    // 1. Generate START condition
     I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
-    // Wait until the START condition is generated
-    // I cant Find SB flag in the I2C_ISR register
+    // 2. Wait until START condition is generated (check START bit in CR2)
+    while (!(pI2CHandle->pI2Cx->CR2 & (1 << I2C_CR2_START)));
+
+    // 3. Send address phase
+    I2C_ExecuteAddressPhase(pI2CHandle->pI2Cx, SlaveAddr);
+
+    // 4. Wait until address is sent (ADDR flag in ISR)
+    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ISR_ADDR));
+
+    // 5. Clear ADDR flag by reading ISR and then CR2 (as per reference manual)
+    (void)pI2CHandle->pI2Cx->ISR;
+    (void)pI2CHandle->pI2Cx->CR2;
+
+    // 6. Send data bytes
+    for (uint32_t i = 0; i < Len; i++) {
+        // Wait until TXIS (Transmit interrupt status) flag is set
+        while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ISR_TXE));
+        // Write data to TXDR
+        pI2CHandle->pI2Cx->TXDR = pTxBuffer[i];
+    }
+
+    // 7. Wait until transfer complete (TC flag)
+    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ISR_TC));
+
+    // 8. Generate STOP condition 
+    I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+
+
+
 }
 static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx) {
     // Generate a START condition
     pI2Cx->CR1 |= (1 << I2C_CR2_START);
+}
+
+static  void I2C_ExecuteAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr) {
+
+    SlaveAddr = SlaveAddr << 1; // Shift left to set the address in the correct position
+    SlaveAddr &= ~(1 << 0); // Clear the LSB to indicate a write operation
+    pI2Cx->CR2 |= SlaveAddr; // Set the address in the CR2 register
+
+
+}
+
+static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx) {
+    // Generate a STOP condition
+    pI2Cx->CR2 |= (1 << I2C_CR2_STOP);
+}
+
+
+uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName) {
+    if (pI2Cx->ISR & FlagName) {
+        return 1; // Flag is set
+    } else {
+        return 0; // Flag is not set
+    }
 }

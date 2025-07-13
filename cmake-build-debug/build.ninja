@@ -84,6 +84,13 @@ build CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_spi_driver.c.obj:
   OBJECT_DIR = CMakeFiles\stm32f7xx_drivers.dir
   OBJECT_FILE_DIR = CMakeFiles\stm32f7xx_drivers.dir\drivers\Src
 
+build CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_i2c_driver.c.obj: C_COMPILER__stm32f7xx_drivers_unscanned_Debug D$:/workspace_1.18.0/stm32f7xx_drivers/drivers/Src/stm32f746xx_i2c_driver.c || cmake_object_order_depends_target_stm32f7xx_drivers
+  DEP_FILE = CMakeFiles\stm32f7xx_drivers.dir\drivers\Src\stm32f746xx_i2c_driver.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  INCLUDES = -ID:/workspace_1.18.0/stm32f7xx_drivers/drivers -ID:/workspace_1.18.0/stm32f7xx_drivers/drivers/Inc
+  OBJECT_DIR = CMakeFiles\stm32f7xx_drivers.dir
+  OBJECT_FILE_DIR = CMakeFiles\stm32f7xx_drivers.dir\drivers\Src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target stm32f7xx_drivers
@@ -92,7 +99,7 @@ build CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_spi_driver.c.obj:
 #############################################
 # Link the executable stm32f7xx_drivers.exe
 
-build stm32f7xx_drivers.exe: C_EXECUTABLE_LINKER__stm32f7xx_drivers_Debug CMakeFiles/stm32f7xx_drivers.dir/Src/main.c.obj CMakeFiles/stm32f7xx_drivers.dir/Src/syscalls.c.obj CMakeFiles/stm32f7xx_drivers.dir/Src/sysmem.c.obj CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_gpio_driver.c.obj CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_spi_driver.c.obj
+build stm32f7xx_drivers.exe: C_EXECUTABLE_LINKER__stm32f7xx_drivers_Debug CMakeFiles/stm32f7xx_drivers.dir/Src/main.c.obj CMakeFiles/stm32f7xx_drivers.dir/Src/syscalls.c.obj CMakeFiles/stm32f7xx_drivers.dir/Src/sysmem.c.obj CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_gpio_driver.c.obj CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_spi_driver.c.obj CMakeFiles/stm32f7xx_drivers.dir/drivers/Src/stm32f746xx_i2c_driver.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\stm32f7xx_drivers.dir
