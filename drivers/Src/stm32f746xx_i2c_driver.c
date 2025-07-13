@@ -10,6 +10,9 @@ void I2C_Init(I2C_Handle_t *pI2CHandle) {
 
     uint32_t tempreg = 0;
 
+    // Enable the I2C1 peripheral clock
+    I2C_PeriClockControl(pI2CHandle->pI2Cx , ENABLE);
+
     tempreg |= pI2CHandle->I2C_Config.I2C_DeviceAddress << 1; // Shift left to set the address in the correct position
     tempreg |= (1 << 15); // Set the ADDR bit in the OAR1 register
     pI2CHandle->pI2Cx->OAR1 |= tempreg; // Set the device address in the OAR1 register
@@ -43,43 +46,86 @@ void I2C_Init(I2C_Handle_t *pI2CHandle) {
     }
 }
 
-void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t Sr) {
-    // 1. Generate START condition
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr) {
+
+ // 1. Clear and configure CR2 with address, byte count, and direction
+    uint32_t temp = pI2CHandle->pI2Cx->CR2;
+    temp &= ~((0x7F << I2C_CR2_SADD) | (0xFF << I2C_CR2_NBYTES) | (1 << I2C_CR2_RD_WRN));
+    temp |= ((SlaveAddr << 1) << I2C_CR2_SADD); // 7-bit address shifted
+    temp |= (Len << I2C_CR2_NBYTES);            // Number of bytes
+    temp |= (1 << I2C_CR2_AUTOEND);            // Auto-end mode
+    pI2CHandle->pI2Cx->CR2 = temp;
+
+    // 2. Generate START condition
     I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
-    // 2. Wait until START condition is generated (check START bit in CR2)
-    while (!(pI2CHandle->pI2Cx->CR2 & (1 << I2C_CR2_START)));
-
-    // 3. Send address phase
-    I2C_ExecuteAddressPhase(pI2CHandle->pI2Cx, SlaveAddr);
-
-    // 4. Wait until address is sent (ADDR flag in ISR)
-    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ISR_ADDR));
-
-    // 5. Clear ADDR flag by reading ISR and then CR2 (as per reference manual)
-    (void)pI2CHandle->pI2Cx->ISR;
-    (void)pI2CHandle->pI2Cx->CR2;
-
-    // 6. Send data bytes
-    for (uint32_t i = 0; i < Len; i++) {
-        // Wait until TXIS (Transmit interrupt status) flag is set
-        while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ISR_TXE));
-        // Write data to TXDR
+    // 3. Send data bytes
+    for(uint32_t i = 0; i < Len; i++) {
+        // Wait until TXE flag is set
+        while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_TXE)) {
+            // Consider adding a timeout here
+        }
+        // Send data byte
         pI2CHandle->pI2Cx->TXDR = pTxBuffer[i];
     }
 
-    // 7. Wait until transfer complete (TC flag)
-    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ISR_TC));
-
-    // 8. Generate STOP condition 
+    // 4. In auto-end mode, STOP is generated automatically after the last byte
+    // Wait for STOPF flag
+    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_STOPF));
+    
     I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+    // 5. Clear STOPF flag
+//    pI2CHandle->pI2Cx->ICR |= (1 << 5); // STOPF bit position in ICR
+
 
 
 
 }
+void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi) {
+    if (EnorDi == ENABLE) {
+        // Enable the I2C peripheral
+        pI2Cx->CR1 |= (1 << 0); // Set the PE bit in CR1 register
+    } else {
+        // Disable the I2C peripheral
+        pI2Cx->CR1 &= ~(1 << 0); // Clear the PE bit in CR1 register
+    }
+}
+
+void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi) {
+    if (EnorDi == ENABLE) {
+        // Enable the clock for the I2C peripheral
+        if (pI2Cx == I2C1) {
+            I2C1_PCLK_EN();
+        }
+        else if (pI2Cx == I2C2) {
+            I2C2_PCLK_EN();
+        }
+        else if (pI2Cx == I2C3) {
+            I2C3_PCLK_EN();
+        }
+        else if (pI2Cx == I2C4) {
+            I2C4_PCLK_EN();
+        }
+    }else {
+        // Disable the clock for the I2C peripheral
+        if (pI2Cx == I2C1) {
+            I2C1_PCLK_DI();
+        }
+        else if (pI2Cx == I2C2) {
+            I2C2_PCLK_DI();
+        }
+        else if (pI2Cx == I2C3) {
+            I2C3_PCLK_DI();
+        }
+        else if (pI2Cx == I2C4) {
+            I2C4_PCLK_DI();
+        }
+    }
+}
 static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx) {
     // Generate a START condition
-    pI2Cx->CR1 |= (1 << I2C_CR2_START);
+    pI2Cx->CR2 |= (1 << I2C_CR2_START);
+ 
 }
 
 static  void I2C_ExecuteAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr) {

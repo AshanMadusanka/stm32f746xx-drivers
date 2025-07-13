@@ -52,6 +52,7 @@ typedef struct {
 
 /** I2C Flag Names */
 #define I2C_FLAG_TXE (1 << I2C_ISR_TXE) /*!< Transmit Data Register Empty */
+#define I2C_FLAG_TXIS (1 << I2C_ISR_TXIS) /*!< Transmit Interrupt Status */
 #define I2C_FLAG_RXNE (1 << I2C_ISR_RXNE) /*!< Receive Data Register Not Empty */
 #define I2C_FLAG_TC (1 << I2C_ISR_TC) /*!< Transfer Complete Flag */
 #define I2C_FLAG_OVR (1 << I2C_ISR_OVR)/*!< Overrun/Underrun Flag */
@@ -61,11 +62,16 @@ typedef struct {
 #define I2C_FLAG_STOPF (1 << I2C_ISR_STOPF) /*!< Stop Detection Flag */
 #define I2C_FLAG_TIMEOUT (1 << I2C_ISR_TIMEOUT) /*!< Timeout Flag */
 
+/** I2C Status Register Flags */
+#define I2C_DISABLE_SR  	RESET
+#define I2C_ENABLE_SR   	SET
+
 void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
 void I2C_Init(I2C_Handle_t *pI2CHandle);
 void I2C_DeInit(I2C_RegDef_t *pI2Cx);
-void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t Sr);
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr);
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName);
+void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
 void I2C_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);
 void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
 

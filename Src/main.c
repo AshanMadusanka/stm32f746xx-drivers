@@ -42,13 +42,13 @@ volatile uint8_t dataAvailable = 0;
  * PA6--->MISO
  * PA7--->MOSI
  */
-void SPI_GpioInit();
-void SPI1_Inits();
-void SPI1_IRQHandler(void);
-void Slave_GPIO_InterruptPinInit();
+void I2C_GpioInit();
+void I2C1_Inits();
 
 
+I2C_Handle_t I2C1Handle;
 
+uint8_t someData[] = "Hello from STM32F746 \n";
 
 void Delay() {
     for (uint32_t i = 0; i < 500000/2; i++) {
@@ -58,140 +58,59 @@ void Delay() {
 
 int main(void) {
 
-    uint8_t dummy = 0xff;
+    // Initialize the GPIO pins for I2C
+    I2C_GpioInit();
 
-    Slave_GPIO_InterruptPinInit();
+    // Initialize I2C1 peripheral
+    I2C1_Inits();
 
-    //this function is used to initialize the GPIO pins to behave as SPI2 pins
-    SPI_GpioInit();
+    // Enable the I2C1 peripheral
+    I2C_PeripheralControl(I2C1, ENABLE);
 
-    //This function is used to initialize the SPI2 peripheral parameters
-    SPI1_Inits();
-    /*
-    * making SSOE 1 does NSS output enable.
-    * The NSS pin is automatically managed by the hardware.
-    * i.e when SPE=1 , NSS will be pulled to low
-    * and NSS pin will be high when SPE=0
-    */
-    SPI_SSOEConfig(SPI1,ENABLE);
+    // Send data to a slave device (example)
 
-    SPI_IRQInterruptConfig(IRQ_NO_SPI1,ENABLE);
+    I2C_MasterSendData(&I2C1Handle, someData, strlen(someData), 0x68);
 
-    while(1){
-
-        rcvStop = 0;
-
-        while(!dataAvailable); //wait till data available interrupt from transmitter device(slave)
-
-        GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,DISABLE);
-
-        //enable the SPI2 peripheral
-        SPI_PeripheralControl(SPI1,ENABLE);
-
-
-        while(!rcvStop)
-        {
-            /* fetch the data from the SPI peripheral byte by byte in interrupt mode */
-            while ( SPI_SendDataIT(&SPI1Handle,&dummy,1) == SPI_BUSY_IN_TX);
-            while ( SPI_ReceiveDataIT(&SPI1Handle,&ReadByte,1) == SPI_BUSY_IN_RX );
-        }
-
-
-        // confirm SPI is not busy
-        while( SPI_GetFlagStatus(SPI1,SPI_BUSY_FLAG) );
-
-        //Disable the SPI2 peripheral
-        SPI_PeripheralControl(SPI1,DISABLE);
-
-        printf("Rcvd data = %s\n",RcvBuff);
-
-        dataAvailable = 0;
-
-        GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE);
-
+    while (1) {
 
     }
 
-    return 0;
+}
 
+void I2C_GpioInit() {
+    // Enable GPIOB clock first
+    GPIOB_PCLK_EN();
+    
+    GPIO_Handle_t I2CPins = {0};
+
+    I2CPins.pGPIOx = GPIOB;
+    I2CPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALT;
+    I2CPins.GPIO_PinConfig.GPIO_PinAltFunMode = 4; // AF4 for I2C1
+    I2CPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD; // Open-drain
+    I2CPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU; // Pull-up
+    I2CPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+
+    // Configure PB8 (SCL)
+    I2CPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_8;
+    GPIO_Init(&I2CPins);
+
+    // Configure PB9 (SDA)
+    I2CPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_9;
+    GPIO_Init(&I2CPins);
+}
+
+void I2C1_Inits() {
+
+
+
+    I2C1Handle.pI2Cx = I2C1; // Use I2C1 peripheral
+    I2C1Handle.I2C_Config.I2C_SCLSpeed = I2C_SCL_SPEED_SM; // Set SCL speed to Standard Mode
+    I2C1Handle.I2C_Config.I2C_DeviceAddress = 0x68; // Set device address (example)
+    I2C1Handle.I2C_Config.I2C_ACKControl = I2C_ACK_ENABLE; // Enable ACK
+    I2C1Handle.I2C_Config.I2C_FMDutyCycle = I2C_FM_DUTY_2; // Set Fast Mode Duty Cycle
+    I2C_Init(&I2C1Handle); // Initialize I2C1 with the configured settings
 
 }
 
-void SPI_GpioInit() {
 
-    GPIO_Handle_t SPIPins;
 
-    SPIPins.pGPIOx = GPIOA; // Use GPIOA for SPI1
-    SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALT; // Set to alternate function mode
-    SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5; // Alternate function for SPI1
-    SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // Push-pull output type
-    SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; // No pull-up or pull-down
-    SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST; // Fast speed
-
-    // Configure SPI1 pins
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_4; // NSS
-    GPIO_Init(&SPIPins);
-
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_5; // SCK
-    GPIO_Init(&SPIPins);
-
-     SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6; // MISO
-     GPIO_Init(&SPIPins);
-
-    SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7; // MOSI
-    GPIO_Init(&SPIPins);
-}
-
-void SPI1_Inits() {
-
-    SPI1Handle.pSPIx = SPI1;
-    SPI1Handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
-    SPI1Handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-    SPI1Handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV32;
-    SPI1Handle.SPIConfig.SPI_DS = SPI_DS_8BITS;
-    SPI1Handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
-    SPI1Handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
-    SPI1Handle.SPIConfig.SPI_SSM = SPI_SSM_DI; // Disable software slave management
-
-    SPI_Init(&SPI1Handle);
-}
-void Slave_GPIO_InterruptPinInit() {
-    GPIO_Handle_t spiIntPin = {0};
-
-    //this is led gpio configuration
-    spiIntPin.pGPIOx = GPIOD;
-    spiIntPin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6; // Assuming PD6 is used for the interrupt
-    spiIntPin.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT;
-    spiIntPin.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_LOW;
-    spiIntPin.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
-
-    GPIO_Init(&spiIntPin);
-
-    GPIO_IRQPriorityConfig(IRQ_NO_EXTI9_5, 15); // Set priority for EXTI line 9-5
-    GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE);
-}
-
-void SPI1_IRQHandler(void) {
-    SPI_IRQHandling(&SPI1Handle);
-}
-void EXTI9_5_IRQHandler(void) {
-
-    GPIO_IRQHandler(GPIO_PIN_6);
-    dataAvailable = 1;
-}
-
-void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t AppEv)
-{
-    static uint32_t i = 0;
-    /* In the RX complete event , copy data in to rcv buffer . '\0' indicates end of message(rcvStop = 1) */
-    if(AppEv == SPI_EVENT_RX_CMPLT)
-    {
-        RcvBuff[i++] = ReadByte;
-        if(ReadByte == '\0' || ( i == MAX_LEN)){
-            rcvStop = 1;
-            RcvBuff[i-1] = '\0';
-            i = 0;
-        }
-    }
-
-}
