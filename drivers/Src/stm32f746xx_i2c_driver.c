@@ -46,7 +46,8 @@ void I2C_Init(I2C_Handle_t *pI2CHandle) {
     }
 }
 
-void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr) {
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr , uint8_t SrOrStop) {
+
 
  // 1. Clear and configure CR2 with address, byte count, and direction
     uint32_t temp = pI2CHandle->pI2Cx->CR2;
@@ -81,15 +82,57 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t L
     // 4. In auto-end mode, STOP is generated automatically after the last byte
     // Wait for STOPF flag
     while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_STOPF));
-    
-    I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
-    // 5. Clear STOPF flag
-//    pI2CHandle->pI2Cx->ICR |= (1 << 5); // STOPF bit position in ICR
+
+    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_STOPF));
+
+    if (SrOrStop == I2C_DISABLE_SR) {
+       I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+    }
+
 
 
 
 
 }
+void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t SrOrStop)
+{
+    uint32_t temp = pI2CHandle->pI2Cx->CR2;
+
+    // Clear SADD, NBYTES, RD_WRN fields
+    temp &= ~((0x7F << I2C_CR2_SADD) | (0xFF << I2C_CR2_NBYTES) | (1 << I2C_CR2_RD_WRN));
+    temp |= ((SlaveAddr << 1) << I2C_CR2_SADD); // 7-bit address
+    temp |= (Len << I2C_CR2_NBYTES);            // Number of bytes
+    temp |= (1 << I2C_CR2_RD_WRN);              // Set for read
+    temp |= (1 << I2C_CR2_AUTOEND);             // Auto-end mode
+    pI2CHandle->pI2Cx->CR2 = temp;
+
+    // Generate START condition
+    I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
+
+    // Receive data
+    for(uint32_t i = 0; i < Len; i++) {
+        // Wait until RXNE flag is set
+        while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_RXNE)) {
+            // Optionally add timeout
+        }
+        // Read data
+        pRxBuffer[i] = (uint8_t)pI2CHandle->pI2Cx->RXDR;
+    }
+
+    // Wait for STOPF flag (stop condition detected)
+    while (!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_FLAG_STOPF));
+
+    // Clear STOPF flag by writing to ICR
+    pI2CHandle->pI2Cx->ICR |= (1 << I2C_ISR_STOPF);
+
+    // If SrOrStop is I2C_ENABLE_SR, keep the bus active for repeated start
+    if (SrOrStop == I2C_DISABLE_SR) {
+        // Generate STOP condition
+        I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+    }
+
+}
+
 void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi) {
     if (EnorDi == ENABLE) {
         // Enable the I2C peripheral

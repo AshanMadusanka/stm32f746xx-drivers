@@ -48,7 +48,11 @@ void I2C1_Inits();
 
 I2C_Handle_t I2C1Handle;
 
-uint8_t someData[] = "Hello from STM32F746 \n";
+#define MY_ADDR 0x61;
+
+#define SLAVE_ADDR  0x68
+
+uint8_t rcv_buf[32];
 
 void Delay() {
     for (uint32_t i = 0; i < 500000/2; i++) {
@@ -57,6 +61,10 @@ void Delay() {
 }
 
 int main(void) {
+
+    uint8_t commandcode;
+
+	uint8_t len;
 
     // Initialize the GPIO pins for I2C
     I2C_GpioInit();
@@ -67,9 +75,21 @@ int main(void) {
     // Enable the I2C1 peripheral
     I2C_PeripheralControl(I2C1, ENABLE);
 
-    // Send data to a slave device (example)
+    commandcode = 0x51;
 
-    I2C_MasterSendData(&I2C1Handle, someData, strlen(someData), 0x68);
+    I2C_MasterSendData(&I2C1Handle,&commandcode,1,SLAVE_ADDR,I2C_ENABLE_SR);
+
+    I2C_MasterReceiveData(&I2C1Handle,&len,1,SLAVE_ADDR,I2C_ENABLE_SR);
+
+    commandcode = 0x52;
+    I2C_MasterSendData(&I2C1Handle,&commandcode,1,SLAVE_ADDR,I2C_ENABLE_SR);
+
+
+    I2C_MasterReceiveData(&I2C1Handle,rcv_buf,len,SLAVE_ADDR,I2C_DISABLE_SR);
+
+	rcv_buf[len+1] = '\0';
+
+    printf("Data received from slave: %s\n", rcv_buf);
 
     while (1) {
 
@@ -105,7 +125,7 @@ void I2C1_Inits() {
 
     I2C1Handle.pI2Cx = I2C1; // Use I2C1 peripheral
     I2C1Handle.I2C_Config.I2C_SCLSpeed = I2C_SCL_SPEED_SM; // Set SCL speed to Standard Mode
-    I2C1Handle.I2C_Config.I2C_DeviceAddress = 0x68; // Set device address (example)
+    I2C1Handle.I2C_Config.I2C_DeviceAddress = MY_ADDR; // Set device address (example)
     I2C1Handle.I2C_Config.I2C_ACKControl = I2C_ACK_ENABLE; // Enable ACK
     I2C1Handle.I2C_Config.I2C_FMDutyCycle = I2C_FM_DUTY_2; // Set Fast Mode Duty Cycle
     I2C_Init(&I2C1Handle); // Initialize I2C1 with the configured settings
